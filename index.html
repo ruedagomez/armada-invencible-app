@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#070f20" />
+<title>Armada Invencible · Staff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Saira:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ DESIGN TOKENS ============ */
+  :root{
+    --navy-900:#070f20;
+    --navy-850:#091428;
+    --navy-800:#0b1830;
+    --navy-700:#0f213f;
+    --navy-650:#142a52;
+    --navy-550:#1b3666;
+    --gold-500:#d4af37;
+    --gold-400:#e3c25a;
+    --gold-300:#f1da93;
+    --gold-deep:#a07d1a;
+    --ink:#eaf0fb;
+    --muted:#93a5c6;
+    --muted-dim:#5d709a;
+    --line:rgba(212,175,55,.16);
+    --line-soft:rgba(147,165,198,.12);
+    --danger:#ff5d6c;
+    --ok:#43d18a;
+    --r-lg:20px;
+    --r-md:14px;
+    --r-sm:10px;
+    --shadow:0 18px 48px -18px rgba(0,0,0,.7);
+    --maxw:560px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:"Saira",system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--navy-900);
+    background-image:
+      radial-gradient(900px 500px at 78% -8%, rgba(212,175,55,.10), transparent 60%),
+      radial-gradient(800px 600px at -10% 12%, rgba(27,54,102,.55), transparent 58%),
+      radial-gradient(1000px 800px at 50% 120%, rgba(15,33,63,.7), transparent 60%),
+      linear-gradient(180deg,#070f20 0%,#081227 50%,#060c1b 100%);
+    background-attachment:fixed;
+    min-height:100dvh;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  /* film grain overlay */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  }
+
+  ::selection{background:rgba(212,175,55,.3);color:#fff;}
+
+  .display{font-family:"Saira Condensed","Saira",sans-serif;text-transform:uppercase;letter-spacing:.04em;}
+  .num{font-family:"Saira Condensed",sans-serif;font-weight:800;font-variant-numeric:tabular-nums;}
+
+  /* ============ PITCH-LINE MOTIF ============ */
+  .pitch-motif{
+    position:absolute;pointer-events:none;opacity:.5;
+  }
+
+  /* ============ LOGIN ============ */
+  #login-view{
+    min-height:100dvh;display:flex;align-items:center;justify-content:center;
+    padding:32px 22px calc(32px + env(safe-area-inset-bottom));
+    position:relative;
+  }
+  #login-view .pitch-motif{top:-40px;left:50%;transform:translateX(-50%);width:520px;max-width:120vw;}
+  .login-card{
+    width:100%;max-width:400px;position:relative;z-index:2;
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+  }
+  .crest-wrap{
+    position:relative;margin-bottom:22px;
+    filter:drop-shadow(0 14px 26px rgba(0,0,0,.6));
+    animation:dropIn .9s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .crest-wrap::before{
+    content:"";position:absolute;inset:-28px;border-radius:50%;
+    background:radial-gradient(circle,rgba(212,175,55,.22),transparent 68%);
+    z-index:-1;
+  }
+  .crest{width:108px;height:auto;display:block;}
+
+  .club-kicker{
+    font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:11px;
+    letter-spacing:.42em;text-transform:uppercase;color:var(--gold-400);
+    margin-bottom:6px;padding-left:.42em;
+    animation:fadeUp .7s ease .15s both;
+  }
+  .club-name{
+    font-family:"Saira Condensed",sans-serif;font-weight:800;
+    font-size:clamp(34px,9vw,46px);line-height:.92;letter-spacing:.01em;
+    text-transform:uppercase;
+    background:linear-gradient(180deg,#fff 0%,#dfe7f5 40%,#aebdda 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    animation:fadeUp .7s ease .25s both;
+  }
+  .club-sub{
+    font-size:12.5px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;
+    margin-top:10px;font-weight:500;
+    animation:fadeUp .7s ease .33s both;
+  }
+  .rule{
+    width:54px;height:2px;margin:22px 0 26px;border-radius:2px;
+    background:linear-gradient(90deg,transparent,var(--gold-500),transparent);
+    animation:fadeUp .7s ease .4s both;
+  }
+
+  .form{width:100%;display:flex;flex-direction:column;gap:13px;animation:fadeUp .7s ease .48s both;}
+  .field{position:relative;text-align:left;}
+  .field label{
+    display:block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted-dim);font-weight:600;margin:0 0 7px 3px;
+  }
+  .input{
+    width:100%;background:rgba(11,24,48,.7);border:1px solid var(--line-soft);
+    border-radius:var(--r-md);padding:15px 16px;color:var(--ink);font-size:16px;
+    font-family:"Saira",sans-serif;transition:border-color .2s,box-shadow .2s,background .2s;
+    outline:none;
+  }
+  .input::placeholder{color:#46577a;}
+  .input:focus{
+    border-color:var(--gold-500);background:rgba(13,28,56,.95);
+    box-shadow:0 0 0 3px rgba(212,175,55,.14);
+  }
+
+  .btn-primary{
+    margin-top:6px;width:100%;border:none;cursor:pointer;
+    font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:16px;
+    letter-spacing:.14em;text-transform:uppercase;color:#1a1404;
+    padding:16px;border-radius:var(--r-md);position:relative;overflow:hidden;
+    background:linear-gradient(180deg,var(--gold-300),var(--gold-500) 55%,var(--gold-deep));
+    box-shadow:0 10px 24px -8px rgba(212,175,55,.55),inset 0 1px 0 rgba(255,255,255,.4);
+    transition:transform .12s,box-shadow .2s,filter .2s;
+  }
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:active{transform:translateY(1px) scale(.995);}
+  .btn-primary:disabled{cursor:wait;filter:saturate(.4) brightness(.8);}
+  .btn-primary .spin{
+    display:none;width:16px;height:16px;border:2px solid rgba(26,20,4,.35);
+    border-top-color:#1a1404;border-radius:50%;animation:rot .7s linear infinite;
+    vertical-align:-3px;margin-right:8px;
+  }
+  .btn-primary.loading .spin{display:inline-block;}
+  .btn-primary.loading .lbl{opacity:.7;}
+
+  .auth-msg{
+    min-height:18px;font-size:13px;text-align:center;margin-top:4px;
+    color:var(--danger);font-weight:500;letter-spacing:.01em;
+    opacity:0;transform:translateY(-3px);transition:opacity .25s,transform .25s;
+  }
+  .auth-msg.show{opacity:1;transform:none;}
+  .auth-msg.ok{color:var(--ok);}
+
+  .login-foot{
+    margin-top:26px;font-size:11.5px;color:var(--muted-dim);letter-spacing:.04em;
+    line-height:1.5;animation:fadeUp .7s ease .56s both;
+  }
+  .login-foot b{color:var(--muted);font-weight:600;}
+
+  /* ============ APP SHELL ============ */
+  #app-view{display:none;flex-direction:column;min-height:100dvh;}
+  #app-view.active{display:flex;}
+
+  .app-header{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    background:linear-gradient(180deg,rgba(8,18,38,.92),rgba(8,18,38,.74));
+    border-bottom:1px solid var(--line);
+    padding:calc(env(safe-area-inset-top) + 12px) 18px 12px;
+  }
+  .header-row{
+    max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;gap:12px;
+  }
+  .header-crest{width:34px;height:auto;flex:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));}
+  .header-titles{flex:1;min-width:0;line-height:1.05;}
+  .header-titles .h-club{
+    font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:16px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .header-titles .h-sec{
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-400);
+    font-weight:600;margin-top:1px;
+  }
+  .conn-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--muted-dim);flex:none;
+    box-shadow:0 0 0 0 rgba(67,209,138,.5);transition:background .3s;
+  }
+  .conn-dot.live{background:var(--ok);animation:pulse 2.4s infinite;}
+  .icon-btn{
+    flex:none;width:38px;height:38px;border-radius:11px;border:1px solid var(--line-soft);
+    background:rgba(13,28,56,.6);color:var(--muted);cursor:pointer;
+    display:grid;place-items:center;transition:.18s;
+  }
+  .icon-btn:hover{color:var(--gold-400);border-color:var(--line);}
+  .icon-btn:active{transform:scale(.94);}
+  .icon-btn svg{width:18px;height:18px;}
+
+  .app-main{
+    flex:1;width:100%;max-width:var(--maxw);margin:0 auto;
+    padding:20px 18px calc(108px + env(safe-area-inset-bottom));
+  }
+  .section{display:none;animation:sectionIn .4s ease both;}
+  .section.active{display:block;}
+
+  /* section header */
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px;}
+  .sec-head h2{
+    font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:26px;
+    text-transform:uppercase;letter-spacing:.02em;line-height:1;
+  }
+  .sec-head .sub{font-size:12px;color:var(--muted);margin-top:5px;letter-spacing:.04em;}
+  .tag{
+    font-family:"Saira Condensed",sans-serif;font-size:10px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;padding:5px 9px;border-radius:6px;
+    border:1px solid var(--line);color:var(--gold-400);background:rgba(212,175,55,.06);
+    white-space:nowrap;flex:none;
+  }
+  .tag.soft{color:var(--muted);border-color:var(--line-soft);background:rgba(147,165,198,.05);}
+
+  /* cards */
+  .card{
+    background:linear-gradient(165deg,rgba(15,33,63,.85),rgba(9,20,40,.85));
+    border:1px solid var(--line-soft);border-radius:var(--r-lg);
+    padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  .card + .card,.card + .grid,.grid + .card,.card-stack > * + *{margin-top:14px;}
+  .card-stack > * + *{margin-top:14px;}
+
+  /* hero (inicio) */
+  .hero{
+    text-align:center;padding:26px 18px 22px;
+    border:1px solid var(--line);
+    background:
+      radial-gradient(420px 220px at 50% -30%,rgba(212,175,55,.16),transparent 70%),
+      linear-gradient(165deg,rgba(20,42,82,.9),rgba(9,20,40,.92));
+  }
+  .hero .pitch-motif{top:-30px;left:50%;transform:translateX(-50%);width:340px;opacity:.35;}
+  .hero-crest{width:64px;height:auto;position:relative;z-index:2;filter:drop-shadow(0 8px 16px rgba(0,0,0,.55));}
+  .hero h1{
+    font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:30px;
+    text-transform:uppercase;letter-spacing:.02em;margin-top:10px;position:relative;z-index:2;
+    background:linear-gradient(180deg,#fff,#bccbe6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .hero .meta{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-400);font-weight:600;margin-top:6px;position:relative;z-index:2;}
+  .hero .greet{font-size:13.5px;color:var(--muted);margin-top:12px;position:relative;z-index:2;}
+  .hero .greet b{color:var(--ink);font-weight:600;}
+
+  /* quick tiles */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .tile{
+    background:linear-gradient(165deg,rgba(15,33,63,.8),rgba(9,20,40,.8));
+    border:1px solid var(--line-soft);border-radius:var(--r-md);padding:14px 10px;text-align:center;
+  }
+  .tile .v{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:26px;color:var(--gold-400);line-height:1;}
+  .tile .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:7px;}
+
+  /* list block label */
+  .block-label{
+    display:flex;align-items:center;gap:8px;margin:22px 2px 12px;
+    font-family:"Saira Condensed",sans-serif;font-size:13px;font-weight:700;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+  }
+  .block-label::after{content:"";flex:1;height:1px;background:var(--line-soft);}
+
+  /* next match card */
+  .match-card{padding:0;}
+  .match-top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px;border-bottom:1px solid var(--line-soft);
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-400);font-weight:600;
+  }
+  .match-top .when{color:var(--muted);}
+  .match-body{display:flex;align-items:center;justify-content:space-between;padding:20px 16px;}
+  .team{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;text-align:center;}
+  .team .badge{
+    width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+    border:1px solid var(--line);background:rgba(20,42,82,.7);
+    font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:18px;color:var(--gold-300);
+  }
+  .team .badge.rival{color:var(--muted);border-color:var(--line-soft);background:rgba(13,28,56,.6);}
+  .team .nm{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.02em;line-height:1.2;max-width:96px;}
+  .vs{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:18px;color:var(--muted-dim);letter-spacing:.1em;}
+  .match-foot{padding:11px 16px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+  .match-foot svg{width:14px;height:14px;color:var(--gold-400);flex:none;}
+
+  /* roster sample row */
+  .player-row{display:flex;align-items:center;gap:13px;padding:13px 14px;}
+  .player-row + .player-row{border-top:1px solid var(--line-soft);}
+  .pnum{
+    width:38px;height:38px;border-radius:10px;flex:none;display:grid;place-items:center;
+    font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:17px;
+    color:var(--navy-900);background:linear-gradient(180deg,var(--gold-300),var(--gold-500));
+  }
+  .pinfo{flex:1;min-width:0;}
+  .pinfo .pn{font-size:14.5px;font-weight:600;color:var(--ink);}
+  .pinfo .pp{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+  .pchev{color:var(--muted-dim);flex:none;}
+  .pchev svg{width:18px;height:18px;}
+
+  /* agenda item */
+  .ag-item{display:flex;gap:14px;padding:14px;}
+  .ag-item + .ag-item{border-top:1px solid var(--line-soft);}
+  .ag-date{
+    width:50px;flex:none;text-align:center;border-right:1px solid var(--line-soft);padding-right:12px;
+  }
+  .ag-date .d{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:24px;color:var(--gold-400);line-height:1;}
+  .ag-date .m{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+  .ag-body{flex:1;}
+  .ag-body .t{font-size:14px;font-weight:600;color:var(--ink);}
+  .ag-body .s{font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px;}
+  .ag-pill{font-family:"Saira Condensed",sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 7px;border-radius:5px;}
+  .ag-pill.train{color:#7fd3ff;background:rgba(80,160,255,.12);}
+  .ag-pill.game{color:var(--gold-300);background:rgba(212,175,55,.14);}
+
+  /* stats decorative bars */
+  .stat-chart{display:flex;align-items:flex-end;gap:10px;height:120px;padding:8px 4px 0;}
+  .bar{flex:1;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--gold-400),rgba(212,175,55,.15));position:relative;}
+  .bar span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.05em;}
+  .stat-legend{display:flex;justify-content:space-around;margin-top:30px;}
+  .stat-legend .l{text-align:center;}
+  .stat-legend .l .v{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .stat-legend .l .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+
+  /* empty state */
+  .empty{text-align:center;padding:30px 20px;}
+  .empty .eicon{
+    width:58px;height:58px;margin:0 auto 14px;border-radius:16px;display:grid;place-items:center;
+    border:1px solid var(--line);background:rgba(20,42,82,.5);color:var(--gold-400);
+  }
+  .empty .eicon svg{width:26px;height:26px;}
+  .empty h3{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.04em;}
+  .empty p{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto;}
+
+  .note{
+    margin-top:14px;font-size:11.5px;color:var(--muted-dim);text-align:center;
+    letter-spacing:.03em;line-height:1.5;
+  }
+  .note b{color:var(--gold-400);font-weight:600;}
+
+  /* ============ BOTTOM NAV ============ */
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(8,18,38,.4),rgba(6,12,27,.96) 45%);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-top:1px solid var(--line);
+  }
+  .nav-inner{max-width:var(--maxw);margin:0 auto;display:flex;}
+  .nav-btn{
+    flex:1;background:none;border:none;cursor:pointer;padding:8px 2px 6px;
+    display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;
+    color:var(--muted-dim);transition:color .2s;
+  }
+  .nav-btn svg{width:23px;height:23px;transition:transform .25s cubic-bezier(.2,.9,.3,1.3);}
+  .nav-btn .nlbl{font-family:"Saira Condensed",sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;}
+  .nav-btn::before{
+    content:"";position:absolute;top:-9px;width:26px;height:3px;border-radius:0 0 3px 3px;
+    background:var(--gold-500);box-shadow:0 0 12px rgba(212,175,55,.7);
+    transform:scaleX(0);transition:transform .28s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .nav-btn.active{color:var(--gold-400);}
+  .nav-btn.active svg{transform:translateY(-2px) scale(1.08);}
+  .nav-btn.active::before{transform:scaleX(1);}
+  .nav-btn:active svg{transform:scale(.9);}
+
+  /* boot splash */
+  #boot{
+    position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+    background:var(--navy-900);transition:opacity .5s;
+  }
+  #boot.hide{opacity:0;pointer-events:none;}
+  #boot .bc{width:72px;height:auto;animation:pulse 1.8s ease-in-out infinite;}
+
+  /* ============ KEYFRAMES ============ */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  @keyframes dropIn{0%{opacity:0;transform:translateY(-26px) scale(.85);}60%{opacity:1;}100%{opacity:1;transform:none;}}
+  @keyframes sectionIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  @keyframes rot{to{transform:rotate(360deg);}}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(67,209,138,.45);}50%{opacity:.55;box-shadow:0 0 0 5px rgba(67,209,138,0);}}
+  @keyframes grow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+
+  @media (min-width:600px){
+    .app-main{padding-top:24px;}
+    .hero h1{font-size:34px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SVG SPRITE (crest reused via <use>) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1da93"/>
+      <stop offset=".5" stop-color="#d4af37"/>
+      <stop offset="1" stop-color="#a07d1a"/>
+    </linearGradient>
+    <linearGradient id="navyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b3666"/>
+      <stop offset="1" stop-color="#0b1830"/>
+    </linearGradient>
+    <!-- the club crest -->
+    <g id="crestSym">
+      <path d="M50 3 L93 17 V58 C93 90 73 110 50 117 C27 110 7 90 7 58 V17 Z"
+            fill="url(#navyGrad)" stroke="url(#goldGrad)" stroke-width="3"/>
+      <path d="M50 9 L87 21 V57 C87 85 70 103 50 110 C30 103 13 85 13 57 V21 Z"
+            fill="none" stroke="rgba(212,175,55,.3)" stroke-width="1"/>
+      <!-- stars -->
+      <g fill="url(#goldGrad)">
+        <path d="M32 24 l1.4 3.2 3.5.4 -2.6 2.4 .7 3.4 -3-1.7 -3 1.7 .7-3.4 -2.6-2.4 3.5-.4z"/>
+        <path d="M50 21 l1.5 3.4 3.7.4 -2.8 2.6 .8 3.6 -3.2-1.8 -3.2 1.8 .8-3.6 -2.8-2.6 3.7-.4z"/>
+        <path d="M68 24 l1.4 3.2 3.5.4 -2.6 2.4 .7 3.4 -3-1.7 -3 1.7 .7-3.4 -2.6-2.4 3.5-.4z"/>
+      </g>
+      <!-- football -->
+      <circle cx="50" cy="56" r="17" fill="#0b1830" stroke="url(#goldGrad)" stroke-width="2.4"/>
+      <path d="M50 47 l6.5 4.8 -2.5 7.7 -8 0 -2.5-7.7z" fill="url(#goldGrad)"/>
+      <g stroke="url(#goldGrad)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <path d="M50 47 V41"/><path d="M56.5 51.8 l5.5-3"/><path d="M54 59.5 l3.5 5"/>
+        <path d="M46 59.5 l-3.5 5"/><path d="M43.5 51.8 l-5.5-3"/>
+      </g>
+      <!-- waves (armada) -->
+      <g stroke="url(#goldGrad)" stroke-width="2" fill="none" stroke-linecap="round" opacity=".9">
+        <path d="M26 84 q6-5 12 0 t12 0 t12 0 t12 0"/>
+        <path d="M30 92 q5-4 10 0 t10 0 t10 0 t10 0"/>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<!-- pitch line svg template (reused) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="pitchSym" stroke="rgba(212,175,55,.5)" stroke-width="1" fill="none">
+      <rect x="2" y="2" width="396" height="236" rx="4"/>
+      <line x1="200" y1="2" x2="200" y2="238"/>
+      <circle cx="200" cy="120" r="42"/>
+      <circle cx="200" cy="120" r="3" fill="rgba(212,175,55,.5)"/>
+      <rect x="2" y="70" width="46" height="100"/>
+      <rect x="352" y="70" width="46" height="100"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- ============ BOOT SPLASH ============ -->
+<div id="boot">
+  <svg class="bc" viewBox="0 0 100 120"><use href="#crestSym"/></svg>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<section id="login-view">
+  <svg class="pitch-motif" viewBox="0 0 400 240"><use href="#pitchSym"/></svg>
+  <div class="login-card">
+    <div class="crest-wrap">
+      <svg class="crest" viewBox="0 0 100 120"><use href="#crestSym"/></svg>
+    </div>
+    <div class="club-kicker">Cuerpo Técnico</div>
+    <h1 class="club-name">Armada<br>Invencible</h1>
+    <div class="club-sub">Prebenjamín · 4ª Andaluza</div>
+    <div class="rule"></div>
+
+    <form class="form" id="login-form" autocomplete="on" novalidate>
+      <div class="field">
+        <label for="email">Correo</label>
+        <input class="input" type="email" id="email" name="email" placeholder="entrenador@armada.com" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Contraseña</label>
+        <input class="input" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button class="btn-primary" id="login-btn" type="submit">
+        <span class="spin"></span><span class="lbl">Acceder</span>
+      </button>
+      <div class="auth-msg" id="auth-msg"></div>
+    </form>
+
+    <div class="login-foot">
+      Acceso restringido al <b>staff técnico</b>.<br>
+      Las cuentas se gestionan desde la consola de Firebase.
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app-view">
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-row">
+      <svg class="header-crest" viewBox="0 0 100 120"><use href="#crestSym"/></svg>
+      <div class="header-titles">
+        <div class="h-club">Armada Invencible</div>
+        <div class="h-sec" id="header-section">Inicio</div>
+      </div>
+      <span class="conn-dot" id="conn-dot" title="Estado de conexión"></span>
+      <button class="icon-btn" id="logout-btn" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="app-main">
+
+    <!-- ===== INICIO ===== -->
+    <section class="section active" data-sec="inicio">
+      <div class="card hero">
+        <svg class="pitch-motif" viewBox="0 0 400 240"><use href="#pitchSym"/></svg>
+        <svg class="hero-crest" viewBox="0 0 100 120"><use href="#crestSym"/></svg>
+        <h1>Armada Invencible</h1>
+        <div class="meta">Temporada 2025 / 26</div>
+        <div class="greet">Sesión iniciada como <b id="user-greet">staff</b></div>
+      </div>
+
+      <div class="block-label">Vistazo rápido</div>
+      <div class="grid">
+        <div class="tile"><div class="v">—</div><div class="k">Jugadores</div></div>
+        <div class="tile"><div class="v">—</div><div class="k">Partidos</div></div>
+        <div class="tile"><div class="v">—</div><div class="k">Posición</div></div>
+      </div>
+
+      <div class="block-label">Próximo partido</div>
+      <div class="card match-card">
+        <div class="match-top"><span>Jornada — · Liga</span><span class="when">por definir</span></div>
+        <div class="match-body">
+          <div class="team">
+            <div class="badge">AI</div>
+            <div class="nm">Armada Invencible</div>
+          </div>
+          <div class="vs">VS</div>
+          <div class="team">
+            <div class="badge rival">?</div>
+            <div class="nm">Rival</div>
+          </div>
+        </div>
+        <div class="match-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/></svg>
+          <span>Sede y hora se cargarán desde Agenda</span>
+        </div>
+      </div>
+      <p class="note">Los datos se conectarán a <b>Firestore</b> en la próxima sesión. Lo de aquí es la estructura de la pantalla.</p>
+    </section>
+
+    <!-- ===== PLANTILLA ===== -->
+    <section class="section" data-sec="plantilla">
+      <div class="sec-head">
+        <div><h2>Plantilla</h2><div class="sub">Fichas, dorsales y posiciones</div></div>
+        <span class="tag soft">Ejemplo</span>
+      </div>
+      <div class="card" style="padding:0">
+        <div class="player-row">
+          <div class="pnum">1</div>
+          <div class="pinfo"><div class="pn">Jugador de ejemplo</div><div class="pp">Portero</div></div>
+          <span class="pchev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        <div class="player-row">
+          <div class="pnum">9</div>
+          <div class="pinfo"><div class="pn">Jugador de ejemplo</div><div class="pp">Delantero</div></div>
+          <span class="pchev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+      </div>
+      <p class="note">Estructura de la lista de jugadores. El <b>alta, edición y guardado en Firebase</b> llega en la siguiente sesión.</p>
+    </section>
+
+    <!-- ===== PARTIDO ===== -->
+    <section class="section" data-sec="partido">
+      <div class="sec-head">
+        <div><h2>Partido</h2><div class="sub">Convocatoria y día de partido</div></div>
+        <span class="tag soft">Ejemplo</span>
+      </div>
+      <div class="card match-card">
+        <div class="match-top"><span>Próximo encuentro</span><span class="when">sin programar</span></div>
+        <div class="match-body">
+          <div class="team"><div class="badge">AI</div><div class="nm">Armada Invencible</div></div>
+          <div class="vs">VS</div>
+          <div class="team"><div class="badge rival">?</div><div class="nm">Rival</div></div>
+        </div>
+      </div>
+      <div class="block-label">Convocatoria</div>
+      <div class="card empty">
+        <div class="eicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <h3>Aún no hay convocatoria</h3>
+        <p>Aquí seleccionarás a los jugadores citados una vez tengamos la plantilla conectada.</p>
+      </div>
+      <p class="note">Pantalla de día de partido. La <b>lógica de convocatoria y alineación</b> se construye más adelante.</p>
+    </section>
+
+    <!-- ===== AGENDA ===== -->
+    <section class="section" data-sec="agenda">
+      <div class="sec-head">
+        <div><h2>Agenda</h2><div class="sub">Entrenamientos y partidos</div></div>
+        <span class="tag soft">Ejemplo</span>
+      </div>
+      <div class="card" style="padding:0">
+        <div class="ag-item">
+          <div class="ag-date"><div class="d">—</div><div class="m">—</div></div>
+          <div class="ag-body"><div class="t">Entrenamiento</div><div class="s"><span class="ag-pill train">Sesión</span> Campo municipal</div></div>
+        </div>
+        <div class="ag-item">
+          <div class="ag-date"><div class="d">—</div><div class="m">—</div></div>
+          <div class="ag-body"><div class="t">Jornada de liga</div><div class="s"><span class="ag-pill game">Partido</span> Por confirmar</div></div>
+        </div>
+      </div>
+      <p class="note">Listado del calendario. Crear y editar eventos en <b>Firebase</b> queda para la próxima sesión.</p>
+    </section>
+
+    <!-- ===== STATS ===== -->
+    <section class="section" data-sec="stats">
+      <div class="sec-head">
+        <div><h2>Stats</h2><div class="sub">Rendimiento del equipo</div></div>
+        <span class="tag soft">Ejemplo</span>
+      </div>
+      <div class="card">
+        <div class="stat-chart">
+          <div class="bar" style="height:45%"><span>J1</span></div>
+          <div class="bar" style="height:70%"><span>J2</span></div>
+          <div class="bar" style="height:38%"><span>J3</span></div>
+          <div class="bar" style="height:88%"><span>J4</span></div>
+          <div class="bar" style="height:60%"><span>J5</span></div>
+        </div>
+        <div class="stat-legend">
+          <div class="l"><div class="v">—</div><div class="k">Goles</div></div>
+          <div class="l"><div class="v">—</div><div class="k">Victorias</div></div>
+          <div class="l"><div class="v">—</div><div class="k">Asist.</div></div>
+        </div>
+      </div>
+      <p class="note">Gráfico de muestra. Las <b>métricas reales</b> saldrán de los partidos registrados en Firebase.</p>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" data-go="inicio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        <span class="nlbl">Inicio</span>
+      </button>
+      <button class="nav-btn" data-go="plantilla">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nlbl">Plantilla</span>
+      </button>
+      <button class="nav-btn" data-go="partido">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l4.3 3.1-1.6 5h-5.4l-1.6-5z"/></svg>
+        <span class="nlbl">Partido</span>
+      </button>
+      <button class="nav-btn" data-go="agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="nlbl">Agenda</span>
+      </button>
+      <button class="nav-btn" data-go="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="9"/></svg>
+        <span class="nlbl">Stats</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- ============ FIREBASE + APP LOGIC ============ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+    setPersistence, browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-ak9cF8eg6-nj3XrFOlJdnWoq5y5UF9M",
+    authDomain: "armada-invencible-8dfa8.firebaseapp.com",
+    projectId: "armada-invencible-8dfa8",
+    storageBucket: "armada-invencible-8dfa8.firebasestorage.app",
+    messagingSenderId: "523353791827",
+    appId: "1:523353791827:web:74ff139bc00896652695a6"
+  };
+
+  // ---- Init ----
+  let auth, db, firebaseReady = false;
+  try {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);           // listo para próximas sesiones
+    window.__db = db;                  // expuesto para la siguiente sesión
+    await setPersistence(auth, browserLocalPersistence).catch(()=>{});
+    firebaseReady = true;
+    console.log("✅ Firebase inicializado · proyecto:", firebaseConfig.projectId);
+  } catch (e) {
+    console.error("❌ Error inicializando Firebase:", e);
+  }
+
+  // ---- Elements ----
+  const $ = (s)=>document.querySelector(s);
+  const boot = $("#boot");
+  const loginView = $("#login-view");
+  const appView = $("#app-view");
+  const loginForm = $("#login-form");
+  const loginBtn = $("#login-btn");
+  const authMsg = $("#auth-msg");
+  const connDot = $("#conn-dot");
+  const userGreet = $("#user-greet");
+  const headerSection = $("#header-section");
+
+  function showMsg(text, ok=false){
+    authMsg.textContent = text;
+    authMsg.classList.toggle("ok", ok);
+    authMsg.classList.add("show");
+  }
+  function clearMsg(){ authMsg.classList.remove("show"); }
+
+  const SECTION_NAMES = {
+    inicio:"Inicio", plantilla:"Plantilla", partido:"Partido", agenda:"Agenda", stats:"Stats"
+  };
+
+  // ---- Navigation ----
+  function goSection(name){
+    document.querySelectorAll(".section").forEach(s=>{
+      s.classList.toggle("active", s.dataset.sec === name);
+    });
+    document.querySelectorAll(".nav-btn").forEach(b=>{
+      b.classList.toggle("active", b.dataset.go === name);
+    });
+    headerSection.textContent = SECTION_NAMES[name] || "";
+    document.querySelector(".app-main").scrollTo({top:0});
+    window.scrollTo({top:0, behavior:"instant"});
+  }
+  document.querySelectorAll(".nav-btn").forEach(b=>{
+    b.addEventListener("click", ()=>goSection(b.dataset.go));
+  });
+
+  // ---- Auth error mapping (ES) ----
+  function authError(code){
+    switch(code){
+      case "auth/invalid-email":        return "El correo no tiene un formato válido.";
+      case "auth/user-disabled":        return "Esta cuenta está deshabilitada.";
+      case "auth/user-not-found":
+      case "auth/wrong-password":
+      case "auth/invalid-credential":   return "Correo o contraseña incorrectos.";
+      case "auth/too-many-requests":    return "Demasiados intentos. Espera unos minutos.";
+      case "auth/network-request-failed":return "Sin conexión. Comprueba tu red.";
+      case "auth/missing-password":     return "Introduce tu contraseña.";
+      default:                          return "No se pudo iniciar sesión. Inténtalo de nuevo.";
+    }
+  }
+
+  // ---- Login ----
+  loginForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    clearMsg();
+    if(!firebaseReady){ showMsg("Firebase no está disponible. Revisa la conexión."); return; }
+    const email = $("#email").value.trim();
+    const password = $("#password").value;
+    if(!email || !password){ showMsg("Rellena correo y contraseña."); return; }
+
+    loginBtn.disabled = true;
+    loginBtn.classList.add("loading");
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged se encarga de mostrar la app
+    }catch(err){
+      showMsg(authError(err.code));
+      loginBtn.disabled = false;
+      loginBtn.classList.remove("loading");
+    }
+  });
+
+  // ---- Logout ----
+  $("#logout-btn").addEventListener("click", async ()=>{
+    try{ await signOut(auth); }catch(e){ console.error(e); }
+  });
+
+  // ---- Auth state ----
+  function enterApp(user){
+    const label = (user.displayName && user.displayName.trim()) || user.email || "staff";
+    userGreet.textContent = label;
+    loginView.style.display = "none";
+    appView.classList.add("active");
+    connDot.classList.toggle("live", firebaseReady);
+    goSection("inicio");
+  }
+  function enterLogin(){
+    appView.classList.remove("active");
+    loginView.style.display = "flex";
+    loginBtn.disabled = false;
+    loginBtn.classList.remove("loading");
+    loginForm.reset();
+  }
+
+  if(firebaseReady){
+    onAuthStateChanged(auth, (user)=>{
+      if(user) enterApp(user); else enterLogin();
+      boot.classList.add("hide");
+    });
+  } else {
+    enterLogin();
+    boot.classList.add("hide");
+    showMsg("No se pudo conectar con Firebase.");
+  }
+
+  // failsafe: nunca dejar el splash colgado
+  setTimeout(()=>boot.classList.add("hide"), 4000);
+</script>
+</body>
+</html>
