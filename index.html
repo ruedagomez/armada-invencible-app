@@ -686,20 +686,17 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
 
     <!-- STATS -->
     <section class="section" data-sec="stats">
-      <div class="sec-head"><div><h2>Stats</h2><div class="sub">Rendimiento del equipo</div></div><span class="tag soft">Próximamente</span></div>
-      <div class="card">
-        <div class="stat-chart">
-          <div class="bar" style="height:45%"><span>J1</span></div>
-          <div class="bar" style="height:70%"><span>J2</span></div>
-          <div class="bar" style="height:38%"><span>J3</span></div>
-          <div class="bar" style="height:88%"><span>J4</span></div>
-          <div class="bar" style="height:60%"><span>J5</span></div>
-        </div>
-        <div class="stat-legend">
-          <div class="l"><div class="v" id="stat-goles">—</div><div class="k">Goles</div></div>
-          <div class="l"><div class="v" id="stat-victorias">—</div><div class="k">Victorias</div></div>
-          <div class="l"><div class="v" id="stat-partidos">—</div><div class="k">Jugados</div></div>
-        </div>
+      <div class="sec-head"><div><h2>Stats</h2><div class="sub">Rendimiento individual y equipo</div></div></div>
+      <div id="stats-team-summary"></div>
+      <div class="tab-bar" style="margin-top:14px">
+        <button class="tab-btn active" id="stats-tab-p">Partidos</button>
+        <button class="tab-btn" id="stats-tab-a">Entrenamientos</button>
+      </div>
+      <div id="stats-body-p" style="overflow-x:auto;margin-top:1px">
+        <table id="stats-table-p" style="width:100%;border-collapse:collapse;font-size:13px;background:linear-gradient(165deg,rgba(15,33,63,.85),rgba(9,20,40,.85));border-radius:0 0 var(--r-lg) var(--r-lg);overflow:hidden"></table>
+      </div>
+      <div id="stats-body-a" style="display:none;overflow-x:auto;margin-top:1px">
+        <table id="stats-table-a" style="width:100%;border-collapse:collapse;font-size:13px;background:linear-gradient(165deg,rgba(15,33,63,.85),rgba(9,20,40,.85));border-radius:0 0 var(--r-lg) var(--r-lg);overflow:hidden"></table>
       </div>
     </section>
 
@@ -1095,6 +1092,7 @@ function goSection(name){
   window.scrollTo({top:0,behavior:'instant'});
   if(name==='partido') renderMatchSelector();
   if(name==='agenda') renderCalendar();
+  if(name==='stats') renderStats();
 }
 $$('.nav-btn').forEach(b=>b.addEventListener('click',()=>goSection(b.dataset.go)));
 $('#scouting-access').addEventListener('click',()=>goSection('scouting'));
@@ -1359,10 +1357,151 @@ function updateInicio(){
   else{$('#pe-bar').style.background='var(--muted-dim)';$('#pe-title').textContent='Sin eventos próximos';$('#pe-sub').textContent='Añade entrenamientos o eventos en la Agenda';$('#pe-pill').textContent='—';$('#pe-pill').style.cssText='color:var(--muted-dim);';}
   // Stats
   const played=matches.filter(e=>e.fecha<today&&e.golesAFavor!=null);
-  $('#stat-goles').textContent=played.length?played.reduce((s,e)=>s+(Number(e.golesAFavor)||0),0):'—';
-  $('#stat-victorias').textContent=played.length?played.filter(e=>Number(e.golesAFavor)>Number(e.golesEnContra)).length:'—';
-  $('#stat-partidos').textContent=played.length||'—';
 }
+
+/* ============ STATS ============ */
+let statsTab='p';
+let statsSort={field:'apellidos',dir:1};
+let statsSortA={field:'apellidos',dir:1};
+
+document.getElementById('stats-tab-p')?.addEventListener('click',()=>{
+  statsTab='p';
+  $('#stats-tab-p').classList.add('active');$('#stats-tab-a').classList.remove('active');
+  $('#stats-body-p').style.display='';$('#stats-body-a').style.display='none';
+  renderStats();
+});
+document.getElementById('stats-tab-a')?.addEventListener('click',()=>{
+  statsTab='a';
+  $('#stats-tab-a').classList.add('active');$('#stats-tab-p').classList.remove('active');
+  $('#stats-body-p').style.display='none';$('#stats-body-a').style.display='';
+  renderStats();
+});
+
+function renderStats(){
+  if(currentSection!=='stats') return;
+  const MATCH=['Liga','Copa','Torneo','Amistoso'];
+  const matchEvs=allEvents.filter(e=>MATCH.includes(e.tipo));
+  const trainEvs=allEvents.filter(e=>e.tipo==='Entrenamiento'&&!e.suspendido);
+  const today=new Date().toISOString().split('T')[0];
+  const played=matchEvs.filter(e=>e.fecha<today&&e.golesAFavor!=null);
+  const wins=played.filter(e=>Number(e.golesAFavor)>Number(e.golesEnContra)).length;
+  const draws=played.filter(e=>Number(e.golesAFavor)===Number(e.golesEnContra)).length;
+  const losses=played.filter(e=>Number(e.golesAFavor)<Number(e.golesEnContra)).length;
+  const gf=played.reduce((s,e)=>s+Number(e.golesAFavor||0),0);
+  const gc=played.reduce((s,e)=>s+Number(e.golesEnContra||0),0);
+  const totalTraining=trainEvs.length;
+  const totalWithAsist=trainEvs.filter(e=>Object.keys(e.asistencia||{}).length>0).length;
+  const avgAsist=totalWithAsist>0?Math.round(trainEvs.reduce((s,e)=>{
+    const a=Object.values(e.asistencia||{}).filter(v=>v==='asiste'||v==='retraso').length;
+    return s+a;
+  },0)/totalWithAsist):null;
+
+  const sumEl=$('#stats-team-summary');
+  if(sumEl) sumEl.innerHTML=`
+    <div style="display:flex;background:linear-gradient(165deg,rgba(15,33,63,.85),rgba(9,20,40,.85));border:1px solid var(--line-soft);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)">
+      <div style="flex:1;text-align:center;padding:16px 8px;border-right:1px solid var(--line-soft)">
+        <div style="font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:26px;color:var(--ok);line-height:1">${wins}</div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px">Victorias</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:16px 8px;border-right:1px solid var(--line-soft)">
+        <div style="font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:26px;color:var(--gold-400);line-height:1">${draws}</div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px">Empates</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:16px 8px;border-right:1px solid var(--line-soft)">
+        <div style="font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:26px;color:var(--danger);line-height:1">${losses}</div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px">Derrotas</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:16px 8px;border-right:1px solid var(--line-soft)">
+        <div style="font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--ink);line-height:1">${gf}–${gc}</div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px">Goles</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:16px 8px">
+        <div style="font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:26px;color:#7fd3ff;line-height:1">${avgAsist!==null?avgAsist:'—'}</div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px">${totalTraining>0?'Asist. media':'Entrenos'}</div>
+      </div>
+    </div>`;
+
+  if(statsTab==='p') renderStatsPartidos(matchEvs);
+  else renderStatsAsistencia(trainEvs);
+}
+
+function thSt(label,field,sort){
+  const active=sort.field===field;
+  const arrow=active?(sort.dir===1?' ↑':' ↓'):'';
+  return `<th style="padding:10px 10px 10px;text-align:${field==='apellidos'?'left':'center'};font-family:'Saira Condensed',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:${active?'var(--gold-400)':'var(--muted-dim)'};cursor:pointer;border-bottom:1px solid var(--line-soft);white-space:nowrap;user-select:none" data-sf="${field}">${label}${arrow}</th>`;
+}
+
+function renderStatsPartidos(matchEvs){
+  const table=$('#stats-table-p'); if(!table) return;
+  let rows=allPlayers.map(p=>{
+    const conv=matchEvs.filter(e=>e.convocados?.includes(p.id)).length;
+    const tit=matchEvs.filter(e=>e.alineacion?.filter(Boolean).includes(p.id)).length;
+    const sup=conv-tit;
+    const min=matchEvs.reduce((s,e)=>s+Number(e.minutosPorJugador?.[p.id]||0),0);
+    const goals=matchEvs.reduce((s,e)=>s+(e.goleadores?.filter(g=>g.playerId===p.id).length||0),0);
+    return {p,conv,tit,sup,min,goals};
+  });
+  const sf=statsSort.field;
+  rows.sort((a,b)=>{ if(sf==='apellidos') return statsSort.dir*(a.p.apellidos||'').localeCompare(b.p.apellidos||'','es'); return statsSort.dir*((a[sf]??0)-(b[sf]??0)); });
+  const headers=['apellidos','conv','tit','sup','min','goals'];
+  const labels=['Jugador','Conv.','Titular','Suplente','Min.','Goles'];
+  const ths=headers.map((f,i)=>thSt(labels[i],f,statsSort)).join('');
+  const trs=rows.map(({p,conv,tit,sup,min,goals},i)=>`
+    <tr style="background:${i%2===0?'rgba(15,33,63,.4)':'rgba(9,20,40,.4)'}">
+      <td style="padding:10px;color:var(--ink);font-weight:600;white-space:nowrap">${p.apellidos||''}, ${p.nombre||''}</td>
+      <td style="padding:10px;text-align:center;color:var(--muted)">${conv||'—'}</td>
+      <td style="padding:10px;text-align:center;color:var(--ok)">${tit||'—'}</td>
+      <td style="padding:10px;text-align:center;color:var(--warn)">${sup||'—'}</td>
+      <td style="padding:10px;text-align:center;color:var(--gold-400);font-family:'Saira Condensed',sans-serif;font-weight:700">${min?min+"'":'—'}</td>
+      <td style="padding:10px;text-align:center;color:var(--ink);font-family:'Saira Condensed',sans-serif;font-weight:700">${goals||'—'}</td>
+    </tr>`).join('');
+  table.innerHTML=`<thead><tr>${ths}</tr></thead><tbody>${trs||'<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted-dim)">Sin datos de partido todavía.<br>Completa partidos en vivo para ver estadísticas.</td></tr>'}</tbody>`;
+  table.querySelectorAll('[data-sf]').forEach(th=>th.addEventListener('click',()=>{
+    const f=th.dataset.sf;
+    if(statsSort.field===f) statsSort.dir*=-1; else statsSort={field:f,dir:f==='apellidos'?1:-1};
+    renderStatsPartidos(matchEvs);
+  }));
+}
+
+function renderStatsAsistencia(trainEvs){
+  const table=$('#stats-table-a'); if(!table) return;
+  const total=trainEvs.length;
+  let rows=allPlayers.map(p=>{
+    const asisten=trainEvs.filter(e=>['asiste','retraso'].includes(e.asistencia?.[p.id])).length;
+    const retrasos=trainEvs.filter(e=>e.asistencia?.[p.id]==='retraso').length;
+    const faltas=trainEvs.filter(e=>['no_asiste','no_justificado'].includes(e.asistencia?.[p.id])).length;
+    const justif=trainEvs.filter(e=>e.asistencia?.[p.id]==='justificado').length;
+    const lesion=trainEvs.filter(e=>e.asistencia?.[p.id]==='lesion').length;
+    const pct=total>0?Math.round((asisten/total)*100):null;
+    return {p,asisten,retrasos,faltas,justif,lesion,pct};
+  });
+  const sf=statsSortA.field;
+  rows.sort((a,b)=>{ if(sf==='apellidos') return statsSortA.dir*(a.p.apellidos||'').localeCompare(b.p.apellidos||'','es'); const va=a[sf]??-1,vb=b[sf]??-1; return statsSortA.dir*(va-vb); });
+  const headers=['apellidos','asisten','retrasos','faltas','justif','lesion','pct'];
+  const labels=['Jugador','Asisten','Retraso','Faltas','Justif.','Lesión','%'];
+  const ths=headers.map((f,i)=>thSt(labels[i],f,statsSortA)).join('');
+  const trs=rows.map(({p,asisten,retrasos,faltas,justif,lesion,pct},i)=>{
+    const pctColor=pct===null?'var(--muted-dim)':pct>=80?'var(--ok)':pct>=60?'var(--warn)':'var(--danger)';
+    const pctStr=pct!==null?`<span style="font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:15px;color:${pctColor}">${pct}%</span>`:'—';
+    return `<tr style="background:${i%2===0?'rgba(15,33,63,.4)':'rgba(9,20,40,.4)'}">
+      <td style="padding:10px;color:var(--ink);font-weight:600;white-space:nowrap">${p.apellidos||''}, ${p.nombre||''}</td>
+      <td style="padding:10px;text-align:center;color:var(--ok)">${asisten||'—'}</td>
+      <td style="padding:10px;text-align:center;color:var(--warn)">${retrasos||'—'}</td>
+      <td style="padding:10px;text-align:center;color:var(--danger)">${faltas||'—'}</td>
+      <td style="padding:10px;text-align:center;color:#7fd3ff">${justif||'—'}</td>
+      <td style="padding:10px;text-align:center;color:#b48aff">${lesion||'—'}</td>
+      <td style="padding:10px;text-align:center">${pctStr}</td>
+    </tr>`;
+  }).join('');
+  table.innerHTML=`<thead><tr>${ths}</tr></thead><tbody>${trs||`<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--muted-dim)">Sin datos de asistencia todavía.<br>${total===0?'Crea entrenamientos en Agenda primero.':'Pasa lista en los entrenamientos para ver estadísticas.'}</td></tr>`}</tbody>`;
+  table.querySelectorAll('[data-sf]').forEach(th=>th.addEventListener('click',()=>{
+    const f=th.dataset.sf;
+    if(statsSortA.field===f) statsSortA.dir*=-1; else statsSortA={field:f,dir:f==='apellidos'?1:-1};
+    renderStatsAsistencia(trainEvs);
+  }));
+}
+
+/* ============ END STATS ============ */
 
 /* PLAYER FORM */
 function openPlayerForm(id=null){ currentPlayerId=id; playerDeleteStep=0; const p=id?allPlayers.find(x=>x.id===id):null; $('#player-title').textContent=id?'Editar jugador':'Nuevo jugador'; const delBtn=$('#delete-player-btn'); delBtn.style.display=id?'block':'none'; resetDelBtn(delBtn,'Eliminar'); sv('f-nombre',p?.nombre);sv('f-apellidos',p?.apellidos);sv('f-fechaNac',p?.fechaNacimiento);sv('f-dorsal',p?.dorsal??'');sv('f-tutor',p?.nombreTutor);sv('f-tel1',p?.telefono1);sv('f-tel2',p?.telefono2);sv('f-lateralidad',p?.lateralidad);sv('f-pos1',p?.posicion1);sv('f-pos2',p?.posicion2);sv('f-club',p?.clubProcedencia);sv('f-estado',p?.estado||'Disponible');sv('f-licencia',p?.licenciaActiva??false);sv('f-nroLicencia',p?.nroLicencia);sv('f-talla',p?.tallaEquipacion);sv('f-avisoMedico',p?.avisoMedico);sv('f-notas',p?.notas); clearFMsg('#player-form-msg');resetSaveBtn('#save-player-btn','Guardar jugador'); openOverlay('player-overlay'); }
@@ -1405,7 +1544,7 @@ $('#save-event-btn').addEventListener('click',async()=>{ const fecha=gv('fe-fech
 /* FIRESTORE */
 function startListeners(){
   if(!unsubPlayers) unsubPlayers=onSnapshot(collection(db,'jugadores'),snap=>{allPlayers=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.apellidos||'').localeCompare(b.apellidos||'','es'));updateInicio();if(plantillaView==='lista')renderList(filterList());else renderPositional(filterPositional());},e=>console.error('jugadores:',fsError(e)));
-  if(!unsubEvents) unsubEvents=onSnapshot(collection(db,'eventos'),snap=>{allEvents=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));renderEventList(allEvents);updateInicio();if(currentSection==='partido'&&!selectedMatchId)renderMatchSelector();},e=>console.error('eventos:',fsError(e)));
+  if(!unsubEvents) unsubEvents=onSnapshot(collection(db,'eventos'),snap=>{allEvents=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));renderEventList(allEvents);updateInicio();if(currentSection==='partido'&&!selectedMatchId)renderMatchSelector();if(currentSection==='stats')renderStats();if(currentEventId&&$('#ev-body-asis')?.style.display!=='none')renderAsistencia();},e=>console.error('eventos:',fsError(e)));
   if(!unsubScouts) unsubScouts=onSnapshot(collection(db,'scouting'),snap=>{allScouts=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.apellidos||'').localeCompare(b.apellidos||'','es'));updateInicio();if(currentSection==='scouting')renderScoutList();},e=>console.error('scouting:',fsError(e)));
 }
 function stopListeners(){if(unsubPlayers){unsubPlayers();unsubPlayers=null;}if(unsubEvents){unsubEvents();unsubEvents=null;}if(unsubScouts){unsubScouts();unsubScouts=null;}allPlayers=[];allEvents=[];allScouts=[];}
@@ -1759,9 +1898,13 @@ function renderAsistencia(){
   el.querySelectorAll('.asist-btn').forEach(btn=>btn.addEventListener('click',async()=>{
     if(!currentEventId) return;
     const pid=btn.dataset.pid, status=btn.dataset.status;
+    // Optimistic update inmediato: deselecciona todos en esta fila, marca el pulsado
+    btn.closest('.asist-row').querySelectorAll('.asist-btn').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    // Actualiza el resumen también (renderAsistencia completo vendrá del onSnapshot)
     try{
       await updateDoc(doc(db,'eventos',currentEventId),{[`asistencia.${pid}`]:status,updatedAt:serverTimestamp()});
-    }catch(e){ console.error('asistencia:',e); }
+    }catch(e){ console.error('asistencia:',e); renderAsistencia(); }
   }));
 }
 
