@@ -441,6 +441,38 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
 .mr-min{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;color:var(--gold-400);min-width:38px;text-align:right;}
 .mr-footer{flex:none;padding:14px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);}
 @keyframes slideUp{from{transform:translateY(60px);opacity:0;}to{transform:none;opacity:1;}}
+
+/* RECURRING GENERATOR */
+.day-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.day-btn{width:42px;height:42px;border-radius:10px;border:1px solid var(--line-soft);background:rgba(11,24,48,.6);color:var(--muted-dim);cursor:pointer;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;transition:.18s;}
+.day-btn.active{background:rgba(212,175,55,.15);border-color:var(--gold-500);color:var(--gold-400);}
+.rg-preview{font-size:13px;color:var(--muted);text-align:center;padding:14px;border:1px dashed var(--line-soft);border-radius:var(--r-md);line-height:1.5;}
+.rg-preview b{color:var(--gold-400);}
+/* ATTENDANCE */
+.asist-row{display:flex;align-items:center;gap:10px;padding:10px 14px;}
+.asist-row+.asist-row{border-top:1px solid var(--line-soft);}
+.asist-status-btns{display:flex;gap:3px;flex:none;}
+.asist-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--line-soft);background:rgba(11,24,48,.5);cursor:pointer;font-size:10.5px;font-weight:700;color:var(--muted-dim);transition:.15s;display:grid;place-items:center;flex:none;}
+.asist-btn:active{transform:scale(.85);}
+.asist-btn.a-asiste.sel{background:rgba(67,209,138,.2);border-color:rgba(67,209,138,.6);color:#43d18a;}
+.asist-btn.a-retraso.sel{background:rgba(255,166,50,.2);border-color:rgba(255,166,50,.5);color:#ffa632;}
+.asist-btn.a-no_asiste.sel{background:rgba(255,93,108,.2);border-color:rgba(255,93,108,.5);color:#ff5d6c;}
+.asist-btn.a-justificado.sel{background:rgba(127,211,255,.15);border-color:rgba(127,211,255,.4);color:#7fd3ff;}
+.asist-btn.a-no_justificado.sel{background:rgba(255,120,50,.15);border-color:rgba(255,120,50,.4);color:#ff7832;}
+.asist-btn.a-lesion.sel{background:rgba(180,138,255,.15);border-color:rgba(180,138,255,.4);color:#b48aff;}
+.asist-summary{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px 6px;border-bottom:1px solid var(--line-soft);}
+.asist-chip{font-family:"Saira Condensed",sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:6px;}
+/* EVENT TABS */
+.ev-tabs{display:none;border-bottom:1px solid var(--line);background:rgba(11,24,48,.5);}
+.ev-tabs .tab-btn{border-radius:0;}
+.ev-tabs .tab-btn.active::after{left:10%;right:10%;}
+/* SUSPENDIDO */
+.suspendido-badge{font-family:"Saira Condensed",sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;border-radius:4px;color:#ff5d6c;background:rgba(255,93,108,.12);border:1px solid rgba(255,93,108,.2);}
+.event-item.is-suspended .event-title{text-decoration:line-through;opacity:.6;}
+.event-item.is-suspended{opacity:.65;}
+.gen-btn{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--line-soft);background:rgba(13,28,56,.6);color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.18s;}
+.gen-btn:hover{color:var(--gold-400);border-color:var(--line);}
+.gen-btn svg{width:17px;height:17px;}
 </style>
 </head>
 <body>
@@ -630,7 +662,15 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
 
     <!-- AGENDA -->
     <section class="section" data-sec="agenda">
-      <div class="sec-head"><div><h2>Agenda</h2><div class="sub">Entrenamientos y partidos</div></div><span class="tag" id="tag-eventos">0 eventos</span></div>
+      <div class="sec-head">
+        <div><h2>Agenda</h2><div class="sub">Entrenamientos y partidos</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="gen-btn" id="gen-recurring-btn" title="Generar entrenamientos recurrentes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          </button>
+          <span class="tag" id="tag-eventos">0 eventos</span>
+        </div>
+      </div>
       <div id="event-list"><div class="event-card"><div class="empty"><div class="eicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h3>Sin eventos</h3><p>Pulsa <b>+</b> para añadir el primer evento.</p></div></div></div>
       <div class="block-label" style="margin-top:22px">Calendario</div>
       <div class="cal-wrapper">
@@ -769,7 +809,12 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
     <span class="overlay-title-text" id="event-title">Nuevo evento</span>
     <button class="del-btn" id="delete-event-btn">Eliminar</button>
   </div>
-  <div class="overlay-body">
+  <div class="ev-tabs tab-bar" id="ev-tabs" style="margin:0;border-radius:0;border-left:none;border-right:none;border-top:none">
+    <button class="tab-btn active" id="ev-tab-det">Detalles</button>
+    <button class="tab-btn" id="ev-tab-asis">Asistencia</button>
+  </div>
+  <!-- DETALLES BODY -->
+  <div class="overlay-body" id="ev-body-det">
     <div class="form-section"><div class="fsec-label">Evento</div>
       <div class="field"><label for="fe-nombre">Nombre del evento</label><input class="input" type="text" id="fe-nombre" placeholder="Jornada 5 · Campo Paco Rus"></div>
       <div class="field"><label for="fe-tipo">Tipo *</label>
@@ -798,9 +843,29 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
     <div class="form-section"><div class="fsec-label">Notas</div>
       <div class="field"><textarea class="input" id="fe-notas" rows="3" placeholder="Observaciones…"></textarea></div>
     </div>
+    <div class="form-section" id="fe-suspension-section">
+      <div class="fsec-label">Estado</div>
+      <div class="toggle-wrap">
+        <span class="toggle-label">Marcar como suspendido</span>
+        <label class="toggle"><input type="checkbox" id="fe-suspendido"><span class="toggle-slider"></span></label>
+      </div>
+      <div id="fe-motivo-wrap" style="display:none">
+        <div class="field"><label for="fe-motivoSuspension">Motivo de la suspensión</label>
+          <input class="input" type="text" id="fe-motivoSuspension" placeholder="Condiciones meteorológicas, campo ocupado…">
+        </div>
+      </div>
+    </div>
     <div class="form-msg" id="event-form-msg"></div>
   </div>
-  <div class="overlay-footer"><button class="btn-primary" id="save-event-btn"><span class="spin"></span><span class="lbl">Guardar evento</span></button></div>
+  <!-- ASISTENCIA BODY -->
+  <div class="overlay-body" id="ev-body-asis" style="display:none;padding:0">
+    <div class="player-list-card" style="border-radius:0;border-left:none;border-right:none;border-top:none;box-shadow:none">
+      <div id="asistencia-list">
+        <div class="empty"><h3>Sin jugadores</h3><p>Añade jugadores en Plantilla para pasar lista.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="overlay-footer" id="ev-footer"><button class="btn-primary" id="save-event-btn"><span class="spin"></span><span class="lbl">Guardar evento</span></button></div>
 </div>
 
 <!-- LIVE MATCH OVERLAY -->
@@ -898,6 +963,48 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
   <div class="mr-body" id="mr-body"></div>
   <div class="mr-footer">
     <button class="btn-primary" id="mr-close-btn" style="margin-top:0">Cerrar y guardar</button>
+  </div>
+</div>
+
+<!-- RECURRING GENERATOR OVERLAY -->
+<div id="recurring-overlay" class="player-overlay">
+  <div class="overlay-header">
+    <button class="back-btn" id="recurring-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Agenda</button>
+    <span class="overlay-title-text">Entrenamientos recurrentes</span>
+    <div style="width:60px"></div>
+  </div>
+  <div class="overlay-body">
+    <div class="form-section"><div class="fsec-label">Días de la semana</div>
+      <div class="day-picker" id="day-picker">
+        <button class="day-btn active" data-day="1">Lun</button>
+        <button class="day-btn" data-day="2">Mar</button>
+        <button class="day-btn active" data-day="3">Mié</button>
+        <button class="day-btn" data-day="4">Jue</button>
+        <button class="day-btn" data-day="5">Vie</button>
+        <button class="day-btn" data-day="6">Sáb</button>
+        <button class="day-btn" data-day="0">Dom</button>
+      </div>
+    </div>
+    <div class="form-section"><div class="fsec-label">Horario y campo</div>
+      <div class="form-row">
+        <div class="field"><label for="rg-inicio">Hora inicio</label><input class="input" type="time" id="rg-inicio" value="17:00"></div>
+        <div class="field"><label for="rg-fin">Hora fin</label><input class="input" type="time" id="rg-fin" value="18:00"></div>
+      </div>
+      <div class="field"><label for="rg-lugar">Campo</label><input class="input" type="text" id="rg-lugar" placeholder="Campo Municipal"></div>
+    </div>
+    <div class="form-section"><div class="fsec-label">Periodo</div>
+      <div class="form-row">
+        <div class="field"><label for="rg-desde">Desde</label><input class="input" type="date" id="rg-desde"></div>
+        <div class="field"><label for="rg-hasta">Hasta</label><input class="input" type="date" id="rg-hasta"></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="rg-preview" id="rg-preview">Selecciona días y fechas para previsualizar</div>
+    </div>
+    <div class="form-msg" id="rg-msg"></div>
+  </div>
+  <div class="overlay-footer">
+    <button class="btn-primary" id="rg-create-btn" disabled><span class="spin"></span><span class="lbl">Crear entrenamientos</span></button>
   </div>
 </div>
 
@@ -1227,7 +1334,10 @@ function renderEventItem(ev){
   const subtitle=ev.nombre&&ev.rival?'vs '+ev.rival:'';
   const meta=[ev.horaInicio,ev.lugar,ev.localVisitante].filter(Boolean).join(' · ');
   let resHtml=''; if(ev.golesAFavor!=null&&ev.golesEnContra!=null){const gf=Number(ev.golesAFavor),gc=Number(ev.golesEnContra);const rs=gf>gc?'color:#43d18a;background:rgba(67,209,138,.12)':gf<gc?'color:#ff5d6c;background:rgba(255,93,108,.12)':'color:#e3c25a;background:rgba(212,175,55,.1)';resHtml=`<div class="result-badge" style="${rs}">${gf} - ${gc}</div>`;}
-  return `<div class="event-item" data-eid="${ev.id}" data-date="${ev.fecha}"><div class="event-date-col"><div class="ed-day" style="color:${color}">${fp.day}</div><div class="ed-month">${fp.month}</div><div class="ed-dow">${fp.dow}</div></div><div class="event-body"><div class="event-head"><span class="ev-pill" style="color:${color};background:${color}1a">${ev.tipo}</span>${ev.horaInicio?`<span class="ev-time">${ev.horaInicio}</span>`:''}</div><div class="event-title">${title}</div>${subtitle?`<div class="event-nombre">${subtitle}</div>`:''} ${meta?`<div class="event-meta">${meta}</div>`:''}${resHtml}</div><a class="gcal-btn" href="${buildGCalURL(ev)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></a></div>`;
+  const suspBadge=ev.suspendido?`<span class="suspendido-badge">Suspendido</span>`:'';
+  const asistCount=ev.asistencia?Object.values(ev.asistencia).filter(s=>s==='asiste'||s==='retraso').length:null;
+  const asistBadge=(ev.tipo==='Entrenamiento'&&asistCount!=null&&Object.keys(ev.asistencia||{}).length>0)?`<span style="font-family:'Saira Condensed',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:5px;color:#43d18a;background:rgba(67,209,138,.1)">${asistCount} asisten</span>`:'';
+  return `<div class="event-item ${ev.suspendido?'is-suspended':''}" data-eid="${ev.id}" data-date="${ev.fecha}"><div class="event-date-col"><div class="ed-day" style="color:${color}">${fp.day}</div><div class="ed-month">${fp.month}</div><div class="ed-dow">${fp.dow}</div></div><div class="event-body"><div class="event-head"><span class="ev-pill" style="color:${color};background:${color}1a">${ev.tipo}</span>${ev.horaInicio?`<span class="ev-time">${ev.horaInicio}</span>`:''}${suspBadge}${asistBadge}</div><div class="event-title">${title}</div>${subtitle?`<div class="event-nombre">${subtitle}</div>`:''} ${meta?`<div class="event-meta">${meta}</div>`:''}${resHtml}</div><a class="gcal-btn" href="${buildGCalURL(ev)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></a></div>`;
 }
 
 /* INICIO */
@@ -1264,11 +1374,33 @@ $('#save-player-btn').addEventListener('click',async()=>{ const nombre=gv('f-nom
 /* EVENT FORM */
 function updateMatchFields(){const t=document.getElementById('fe-tipo')?.value;document.getElementById('fe-match-fields').style.display=['Amistoso','Torneo','Copa','Liga'].includes(t)?'block':'none';}
 document.getElementById('fe-tipo').addEventListener('change',updateMatchFields);
-function openEventForm(id=null){ currentEventId=id;eventDeleteStep=0; const ev=id?allEvents.find(x=>x.id===id):null; $('#event-title').textContent=id?'Editar evento':'Nuevo evento'; const delBtn=$('#delete-event-btn');delBtn.style.display=id?'block':'none';resetDelBtn(delBtn,'Eliminar'); sv('fe-nombre',ev?.nombre);sv('fe-tipo',ev?.tipo||'Entrenamiento');sv('fe-fecha',ev?.fecha);sv('fe-horaInicio',ev?.horaInicio);sv('fe-horaFin',ev?.horaFin);sv('fe-lugar',ev?.lugar);sv('fe-rival',ev?.rival);sv('fe-localVis',ev?.localVisitante);sv('fe-gf',ev?.golesAFavor??'');sv('fe-gc',ev?.golesEnContra??'');sv('fe-notas',ev?.notas); updateMatchFields();clearFMsg('#event-form-msg');resetSaveBtn('#save-event-btn','Guardar evento'); openOverlay('event-overlay'); }
+document.getElementById('fe-suspendido').addEventListener('change',e=>{
+  document.getElementById('fe-motivo-wrap').style.display=e.target.checked?'block':'none';
+});
+function switchEventTab(tab){
+  const isDet=tab==='det';
+  $('#ev-tab-det').classList.toggle('active',isDet);
+  $('#ev-tab-asis').classList.toggle('active',!isDet);
+  $('#ev-body-det').style.display=isDet?'':'none';
+  $('#ev-body-asis').style.display=isDet?'none':'';
+  $('#ev-footer').style.display=isDet?'':'none';
+}
+$('#ev-tab-det').addEventListener('click',()=>switchEventTab('det'));
+$('#ev-tab-asis').addEventListener('click',()=>{ switchEventTab('asis'); renderAsistencia(); });
+function openEventForm(id=null){ currentEventId=id;eventDeleteStep=0; const ev=id?allEvents.find(x=>x.id===id):null; $('#event-title').textContent=id?'Editar evento':'Nuevo evento'; const delBtn=$('#delete-event-btn');delBtn.style.display=id?'block':'none';resetDelBtn(delBtn,'Eliminar');
+  sv('fe-nombre',ev?.nombre);sv('fe-tipo',ev?.tipo||'Entrenamiento');sv('fe-fecha',ev?.fecha);sv('fe-horaInicio',ev?.horaInicio);sv('fe-horaFin',ev?.horaFin);sv('fe-lugar',ev?.lugar);sv('fe-rival',ev?.rival);sv('fe-localVis',ev?.localVisitante);sv('fe-gf',ev?.golesAFavor??'');sv('fe-gc',ev?.golesEnContra??'');sv('fe-notas',ev?.notas);
+  sv('fe-suspendido',ev?.suspendido??false); document.getElementById('fe-motivoSuspension').value=ev?.motivoSuspension||''; document.getElementById('fe-motivo-wrap').style.display=(ev?.suspendido)?'block':'none';
+  // Tabs: show only for training or editing
+  const isTraining=(ev?.tipo||'Entrenamiento')==='Entrenamiento';
+  document.getElementById('ev-tabs').style.display=(id&&isTraining)?'flex':'none';
+  switchEventTab('det');
+  // Suspension section: only for training
+  document.getElementById('fe-suspension-section').style.display=isTraining?'block':'none';
+  updateMatchFields();clearFMsg('#event-form-msg');resetSaveBtn('#save-event-btn','Guardar evento'); openOverlay('event-overlay'); }
 function closeEventForm(){closeOverlay('event-overlay');currentEventId=null;eventDeleteStep=0;}
 $('#event-back').addEventListener('click',closeEventForm);
 $('#delete-event-btn').addEventListener('click',()=>{ if(!currentEventId) return; if(eventDeleteStep===0){eventDeleteStep=1;activateDelBtn($('#delete-event-btn'),'¿Confirmar?');setTimeout(()=>{if(eventDeleteStep===1){eventDeleteStep=0;resetDelBtn($('#delete-event-btn'),'Eliminar');}},3000);}else{deleteDoc(doc(db,'eventos',currentEventId)).then(closeEventForm).catch(e=>showFMsg('#event-form-msg',fsError(e)));} });
-$('#save-event-btn').addEventListener('click',async()=>{ const fecha=gv('fe-fecha');if(!fecha){showFMsg('#event-form-msg','La fecha es obligatoria.');return;} const gf=gv('fe-gf'),gc=gv('fe-gc'); const data={nombre:gv('fe-nombre'),tipo:gv('fe-tipo')||'Entrenamiento',fecha,horaInicio:gv('fe-horaInicio'),horaFin:gv('fe-horaFin'),lugar:gv('fe-lugar'),rival:gv('fe-rival'),localVisitante:gv('fe-localVis'),golesAFavor:gf!==''?parseInt(gf,10):null,golesEnContra:gc!==''?parseInt(gc,10):null,notas:gv('fe-notas'),updatedAt:serverTimestamp()}; loadSaveBtn('#save-event-btn'); try{if(currentEventId)await updateDoc(doc(db,'eventos',currentEventId),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,'eventos'),data);}closeEventForm();}catch(e){showFMsg('#event-form-msg',fsError(e));resetSaveBtn('#save-event-btn','Guardar evento');} });
+$('#save-event-btn').addEventListener('click',async()=>{ const fecha=gv('fe-fecha');if(!fecha){showFMsg('#event-form-msg','La fecha es obligatoria.');return;} const gf=gv('fe-gf'),gc=gv('fe-gc'); const susp=document.getElementById('fe-suspendido')?.checked??false; const data={nombre:gv('fe-nombre'),tipo:gv('fe-tipo')||'Entrenamiento',fecha,horaInicio:gv('fe-horaInicio'),horaFin:gv('fe-horaFin'),lugar:gv('fe-lugar'),rival:gv('fe-rival'),localVisitante:gv('fe-localVis'),golesAFavor:gf!==''?parseInt(gf,10):null,golesEnContra:gc!==''?parseInt(gc,10):null,notas:gv('fe-notas'),suspendido:susp,motivoSuspension:susp?gv('fe-motivoSuspension'):'',updatedAt:serverTimestamp()}; loadSaveBtn('#save-event-btn'); try{if(currentEventId)await updateDoc(doc(db,'eventos',currentEventId),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,'eventos'),data);}closeEventForm();}catch(e){showFMsg('#event-form-msg',fsError(e));resetSaveBtn('#save-event-btn','Guardar evento');} });
 
 /* FIRESTORE */
 function startListeners(){
@@ -1590,6 +1722,119 @@ $('#mr-close-btn').addEventListener('click',()=>{
 });
 
 /* ============ END LIVE MATCH ============ */
+
+/* ============ ASISTENCIA ============ */
+const ASIST_STATUSES = [
+  {key:'asiste',      label:'✓',  title:'Asiste'},
+  {key:'retraso',     label:'⏰', title:'Retraso'},
+  {key:'no_asiste',   label:'✗',  title:'No asiste'},
+  {key:'justificado', label:'J',  title:'Justificado'},
+  {key:'no_justificado',label:'NJ',title:'No justificado'},
+  {key:'lesion',      label:'🏥', title:'Lesión'},
+];
+
+function renderAsistencia(){
+  const ev = currentEventId ? allEvents.find(e=>e.id===currentEventId) : null;
+  const asistencia = ev?.asistencia || {};
+  const el = $('#asistencia-list');
+  if(!allPlayers.length){ el.innerHTML=`<div class="empty"><h3>Sin jugadores</h3><p>Añade jugadores en Plantilla.</p></div>`; return; }
+  // Summary
+  const counts = {};
+  ASIST_STATUSES.forEach(s=>{ counts[s.key]=Object.values(asistencia).filter(v=>v===s.key).length; });
+  const totalMarcados = Object.values(asistencia).length;
+  const asisten = (counts.asiste||0)+(counts.retraso||0);
+  const summaryHtml = totalMarcados>0 ? `<div class="asist-summary">
+    ${asisten>0?`<span class="asist-chip" style="color:#43d18a;background:rgba(67,209,138,.1)">${asisten} asisten</span>`:''}
+    ${counts.no_asiste>0?`<span class="asist-chip" style="color:#ff5d6c;background:rgba(255,93,108,.08)">${counts.no_asiste} no asisten</span>`:''}
+    ${counts.retraso>0?`<span class="asist-chip" style="color:#ffa632;background:rgba(255,166,50,.1)">${counts.retraso} con retraso</span>`:''}
+    ${counts.justificado>0?`<span class="asist-chip" style="color:#7fd3ff;background:rgba(127,211,255,.08)">${counts.justificado} justificados</span>`:''}
+    ${counts.no_justificado>0?`<span class="asist-chip" style="color:#ff7832;background:rgba(255,120,50,.08)">${counts.no_justificado} no justificados</span>`:''}
+    ${counts.lesion>0?`<span class="asist-chip" style="color:#b48aff;background:rgba(180,138,255,.08)">${counts.lesion} lesión</span>`:''}
+  </div>` : '';
+  el.innerHTML = summaryHtml + allPlayers.map(p=>{
+    const curr = asistencia[p.id] || null;
+    const btns = ASIST_STATUSES.map(s=>`<button class="asist-btn a-${s.key} ${curr===s.key?'sel':''}" data-pid="${p.id}" data-status="${s.key}" title="${s.title}">${s.label}</button>`).join('');
+    return `<div class="asist-row"><div class="pnum ${p.dorsal?'':'pnum-empty'}" style="width:32px;height:32px;font-size:14px;flex:none">${p.dorsal||'—'}</div><div class="pinfo" style="min-width:80px"><div class="pn" style="font-size:13px">${p.apellidos?.split(' ')[0]||''}, ${p.nombre||''}</div></div><div class="asist-status-btns">${btns}</div></div>`;
+  }).join('');
+  el.querySelectorAll('.asist-btn').forEach(btn=>btn.addEventListener('click',async()=>{
+    if(!currentEventId) return;
+    const pid=btn.dataset.pid, status=btn.dataset.status;
+    try{
+      await updateDoc(doc(db,'eventos',currentEventId),{[`asistencia.${pid}`]:status,updatedAt:serverTimestamp()});
+    }catch(e){ console.error('asistencia:',e); }
+  }));
+}
+
+/* ============ GENERADOR RECURRENTE ============ */
+const RG_SELECTED_DAYS = new Set([1,3]); // Lun + Mié por defecto
+
+function rgCalcDates(){
+  const days=[...RG_SELECTED_DAYS];
+  const desde=document.getElementById('rg-desde')?.value;
+  const hasta=document.getElementById('rg-hasta')?.value;
+  if(!days.length||!desde||!hasta) return [];
+  const dates=[]; const cur=new Date(desde+'T12:00:00'); const end=new Date(hasta+'T12:00:00');
+  while(cur<=end){ if(days.includes(cur.getDay())) dates.push(cur.toISOString().split('T')[0]); cur.setDate(cur.getDate()+1); }
+  return dates;
+}
+
+function rgUpdatePreview(){
+  const dates=rgCalcDates();
+  const btn=document.getElementById('rg-create-btn');
+  const prev=document.getElementById('rg-preview');
+  if(!dates.length){ prev.textContent='Selecciona días y fechas para previsualizar'; btn.disabled=true; return; }
+  const first=fechaParts(dates[0]); const last=fechaParts(dates[dates.length-1]);
+  prev.innerHTML=`Se crearán <b>${dates.length} entrenamientos</b><br>Del ${first.day} ${first.month} al ${last.day} ${last.month}`;
+  btn.disabled=false;
+}
+
+$('#gen-recurring-btn').addEventListener('click',()=>{
+  // Pre-fill dates: Sept 1 current/next year → June 30 next year
+  const now=new Date(); let yr=now.getFullYear();
+  if(now.getMonth()>=6) yr=yr; else yr=yr-1; // if before July, use current year's Sept
+  const desde=`${yr+1}-09-01`; const hasta=`${yr+2}-06-30`;
+  // Actually: if we're before Sept this year, from this Sept; else from next Sept
+  const thisYrSept=new Date(yr,8,1);
+  const fromDate = now<thisYrSept ? `${yr}-09-01` : `${yr+1}-09-01`;
+  const toDate = now<thisYrSept ? `${yr+1}-06-30` : `${yr+2}-06-30`;
+  document.getElementById('rg-desde').value=fromDate;
+  document.getElementById('rg-hasta').value=toDate;
+  rgUpdatePreview();
+  openOverlay('recurring-overlay');
+});
+$('#recurring-back').addEventListener('click',()=>closeOverlay('recurring-overlay'));
+
+// Day picker
+$$('#day-picker .day-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  const d=parseInt(btn.dataset.day);
+  if(RG_SELECTED_DAYS.has(d)){RG_SELECTED_DAYS.delete(d);btn.classList.remove('active');}
+  else{RG_SELECTED_DAYS.add(d);btn.classList.add('active');}
+  rgUpdatePreview();
+}));
+['rg-desde','rg-hasta'].forEach(id=>document.getElementById(id)?.addEventListener('change',rgUpdatePreview));
+
+$('#rg-create-btn').addEventListener('click',async()=>{
+  const dates=rgCalcDates();
+  if(!dates.length) return;
+  const horaInicio=document.getElementById('rg-inicio')?.value||'17:00';
+  const horaFin=document.getElementById('rg-fin')?.value||'18:00';
+  const lugar=document.getElementById('rg-lugar')?.value?.trim()||'';
+  loadSaveBtn('#rg-create-btn');
+  try{
+    await Promise.all(dates.map(fecha=>addDoc(collection(db,'eventos'),{
+      tipo:'Entrenamiento', fecha, horaInicio, horaFin, lugar,
+      nombre:'', suspendido:false, motivoSuspension:'', asistencia:{},
+      createdAt:serverTimestamp()
+    })));
+    closeOverlay('recurring-overlay');
+    showFMsg('#event-form-msg',`${dates.length} entrenamientos creados.`,'ok');
+  }catch(e){
+    showFMsg('#rg-msg',fsError(e));
+  }
+  resetSaveBtn('#rg-create-btn','Crear entrenamientos');
+});
+
+/* ============ END RECURRING + ASISTENCIA ============ */
 
 /* AUTH */
 const authMsgEl=$('#auth-msg');
