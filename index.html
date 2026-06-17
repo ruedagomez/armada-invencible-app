@@ -1081,7 +1081,12 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
     </div>
     <div class="form-msg" id="scout-form-msg"></div>
   </div>
-  <div class="overlay-footer"><button class="btn-primary" id="save-scout-btn"><span class="spin"></span><span class="lbl">Guardar registro</span></button></div>
+  <div class="overlay-footer" style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn-primary" id="save-scout-btn"><span class="spin"></span><span class="lbl">Guardar registro</span></button>
+    <button id="incorporar-btn" style="display:none;width:100%;padding:13px;border-radius:var(--r-md);border:1px solid rgba(67,209,138,.35);background:rgba(67,209,138,.08);color:#43d18a;cursor:pointer;font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;transition:.18s">
+      Incorporar a Plantilla ›
+    </button>
+  </div>
 </div>
 
 <script type="module">
@@ -1143,6 +1148,7 @@ function goSection(name){
   if(name==='partido') renderMatchSelector();
   if(name==='agenda') renderCalendar();
   if(name==='stats') renderStats();
+  if(name==='scouting') renderScoutList();
 }
 $$('.nav-btn').forEach(b=>b.addEventListener('click',()=>goSection(b.dataset.go)));
 $('#scouting-access').addEventListener('click',()=>goSection('scouting'));
@@ -1211,6 +1217,9 @@ function openScoutForm(id=null){
   $('#scout-title').textContent=id?'Editar registro':'Nuevo registro';
   const delBtn=$('#delete-scout-btn'); delBtn.style.display=id?'block':'none'; resetDelBtn(delBtn,'Eliminar');
   sv('sc-nombre',s?.nombre); sv('sc-apellidos',s?.apellidos); sv('sc-anio',s?.anio||''); sv('sc-destino',s?.destino||'Pendiente'); sv('sc-tutor',s?.tutor); sv('sc-telefono',s?.telefono); sv('sc-comentarios',s?.comentarios);
+  // Mostrar botón incorporar solo al editar (y si no está ya en Equipo)
+  const incBtn=$('#incorporar-btn');
+  if(incBtn){ incBtn.style.display=(id&&s?.destino!=='Equipo')?'block':'none'; incBtn.disabled=false; incBtn.textContent='Incorporar a Plantilla ›'; }
   clearFMsg('#scout-form-msg'); resetSaveBtn('#save-scout-btn','Guardar registro');
   openOverlay('scout-overlay');
 }
@@ -1228,6 +1237,29 @@ $('#save-scout-btn').addEventListener('click',async()=>{
   loadSaveBtn('#save-scout-btn');
   try{if(currentScoutId)await updateDoc(doc(db,'scouting',currentScoutId),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,'scouting'),data);}closeScoutForm();}
   catch(e){showFMsg('#scout-form-msg',fsError(e));resetSaveBtn('#save-scout-btn','Guardar registro');}
+});
+$('#incorporar-btn').addEventListener('click',async()=>{
+  if(!currentScoutId) return;
+  const s=allScouts.find(x=>x.id===currentScoutId); if(!s) return;
+  // Verificar si ya existe en plantilla
+  const dup=allPlayers.find(p=>p.nombre?.toLowerCase()===s.nombre?.toLowerCase()&&p.apellidos?.toLowerCase()===s.apellidos?.toLowerCase());
+  if(dup){showFMsg('#scout-form-msg',`${s.apellidos}, ${s.nombre} ya está en Plantilla.`,'warn');return;}
+  const btn=$('#incorporar-btn'); btn.disabled=true; btn.textContent='Incorporando…';
+  try{
+    await addDoc(collection(db,'jugadores'),{
+      nombre:s.nombre||'', apellidos:s.apellidos||'',
+      fechaNacimiento:s.anio?`${s.anio}-01-01`:'',
+      nombreTutor:s.tutor||'', telefono1:s.telefono||'',
+      estado:'Disponible', licenciaActiva:false,
+      createdAt:serverTimestamp(), updatedAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,'scouting',currentScoutId),{destino:'Equipo',updatedAt:serverTimestamp()});
+    closeScoutForm();
+    goSection('plantilla');
+  }catch(e){
+    showFMsg('#scout-form-msg',fsError(e));
+    btn.disabled=false; btn.textContent='Incorporar a Plantilla ›';
+  }
 });
 
 /* EXPORT AS IMAGE */
