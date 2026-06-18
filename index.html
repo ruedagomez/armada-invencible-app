@@ -649,8 +649,14 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
           <button class="tab-btn" id="tab-btn-alin">Alineación</button>
         </div>
         <div id="conv-tab">
-          <div class="conv-counter"><span id="conv-num">0</span> / 14 convocados</div>
+          <div class="conv-counter" style="display:flex;align-items:center;justify-content:space-between">
+            <span><span id="conv-num">0</span> / 14 convocados</span>
+            <button id="conv-all-btn" style="font-family:'Saira Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:none;border:none;cursor:pointer;padding:2px 0">Seleccionar todos</button>
+          </div>
           <div class="player-list-card" id="conv-list"></div>
+          <button id="wa-btn" style="display:none;width:100%;margin-top:10px;padding:13px;border-radius:12px;border:1px solid rgba(67,209,138,.25);background:rgba(67,209,138,.06);color:#43d18a;font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.18s;align-items:center;justify-content:center;gap:8px">
+            📲 Mensaje para padres
+          </button>
         </div>
         <div id="alin-tab" style="display:none">
           <div class="filter-chips" id="formation-chips">
@@ -1045,6 +1051,25 @@ textarea.input{resize:vertical;min-height:88px;line-height:1.5;}
   </div>
 </div>
 
+<!-- WA MESSAGE SHEET -->
+<div id="wa-sheet" style="display:none;position:fixed;inset:0;z-index:120;flex-direction:column;justify-content:flex-end">
+  <div class="scorer-backdrop" id="wa-backdrop"></div>
+  <div class="scorer-card" style="max-height:82vh">
+    <div class="scorer-handle"></div>
+    <div class="scorer-title">Mensaje para padres</div>
+    <div id="wa-match-info" style="font-size:12px;color:var(--muted);text-align:center;margin:-10px 16px 14px;"></div>
+    <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto">
+      <div style="font-size:11px;color:var(--muted-2);letter-spacing:.04em">Edita el mensaje si necesitas. Luego cópialo y pégalo en el grupo de padres.</div>
+      <textarea id="wa-textarea" rows="12" style="width:100%;padding:12px 14px;background:rgba(11,24,48,.85);border:1px solid rgba(147,165,198,.15);border-radius:12px;color:var(--ink);font-family:'Saira',sans-serif;font-size:12px;line-height:1.55;resize:vertical;outline:none;-webkit-appearance:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(212,175,55,.35)'" onblur="this.style.borderColor='rgba(147,165,198,.15)'"></textarea>
+      <button id="wa-copy-btn" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(212,175,55,.28);background:rgba(212,175,55,.08);color:var(--gold-lt);font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:10px">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar mensaje
+      </button>
+      <button id="wa-close-btn" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:6px;text-align:center">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- DAY PICKER SHEET -->
 <div id="day-picker-sheet" style="display:none;position:fixed;inset:0;z-index:100;display:none;flex-direction:column;justify-content:flex-end">
   <div class="scorer-backdrop" id="day-picker-backdrop"></div>
@@ -1346,6 +1371,10 @@ $('#tab-btn-alin').addEventListener('click',()=>{ switchPartidoTab('alin'); rend
 function switchPartidoTab(tab){ $('#tab-btn-conv').classList.toggle('active',tab==='conv'); $('#tab-btn-alin').classList.toggle('active',tab==='alin'); $('#conv-tab').style.display=tab==='conv'?'':'none'; $('#alin-tab').style.display=tab==='alin'?'':'none'; }
 function renderConvocatoria(){
   const el=$('#conv-list'); $('#conv-num').textContent=convocados.length;
+  const waBtn=$('#wa-btn'); if(waBtn) waBtn.style.display=convocados.length>0?'flex':'none';
+  const available=allPlayers.filter(p=>!['Lesionado','Sancionado','Baja'].includes(p.estado));
+  const allSelected=available.length>0&&available.slice(0,14).every(p=>convocados.includes(p.id));
+  const allBtn=$('#conv-all-btn'); if(allBtn){ allBtn.textContent=allSelected?'Limpiar selección':'Seleccionar todos'; allBtn.style.color=allSelected?'var(--danger)':'var(--gold)'; }
   const sorted=[...allPlayers].sort((a,b)=>{ const aa=a.estado==='Disponible'||!a.estado?0:1,bb=b.estado==='Disponible'||!b.estado?0:1; return aa-bb||(a.apellidos||'').localeCompare(b.apellidos||'','es'); });
   if(!sorted.length){el.innerHTML=`<div class="empty"><h3>Sin jugadores</h3><p>Añade jugadores en Plantilla.</p></div>`;return;}
   el.innerHTML=sorted.map(p=>{const sel=convocados.includes(p.id);const disabled=['Lesionado','Sancionado','Baja'].includes(p.estado)&&!sel;const est=p.estado||'Disponible';return `<div class="conv-row ${sel?'selected':''} ${disabled?'disabled':''}" data-cid="${p.id}"><div class="conv-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="pnum ${p.dorsal?'':'pnum-empty'}" style="width:34px;height:34px;font-size:15px">${p.dorsal||'—'}</div><div class="pinfo"><div class="pn" style="font-size:13.5px">${p.apellidos||''}, ${p.nombre||''}</div><div class="pp">${p.posicion1||'—'} <span class="estado-badge" style="${ESTADO_STYLE[est]};font-size:8.5px;padding:2px 5px">${est}</span></div></div></div>`;}).join('');
@@ -2167,6 +2196,84 @@ function closeDayPicker(){
 document.getElementById('day-picker-backdrop').addEventListener('click',closeDayPicker);
 
 /* ============ END DAY PICKER ============ */
+
+/* ============ WHATSAPP MESSAGE ============ */
+function formatFechaLarga(dateStr){
+  if(!dateStr) return '';
+  const [y,m,d]=dateStr.split('-').map(Number);
+  const date=new Date(y,m-1,d);
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${days[date.getDay()]}, ${d} de ${months[m-1]}`;
+}
+function calcConcentracion(horaInicio){
+  if(!horaInicio) return '';
+  const [h,m]=horaInicio.split(':').map(Number);
+  const total=h*60+m-45;
+  return `${String(Math.floor(total/60)).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`;
+}
+function generateWAMessage(){
+  const ev=selectedMatchId?allEvents.find(e=>e.id===selectedMatchId):null;
+  if(!ev) return '';
+  const convPlayers=convocados.map(pid=>allPlayers.find(p=>p.id===pid)).filter(Boolean).sort((a,b)=>(Number(a.dorsal)||99)-(Number(b.dorsal)||99));
+  const conc=calcConcentracion(ev.horaInicio);
+  const fecha=formatFechaLarga(ev.fecha);
+  const lines=[
+    `⚽ *RACING PORTUENSE*`,
+    `_Prebenjamín 4ª Andaluza_`,
+    ``,
+    `📋 *Convocatoria${ev.tipo&&ev.tipo!=='Amistoso'?' – '+ev.tipo:''}*`,
+    ev.rival?`🆚 ${ev.rival}`:'',
+    fecha?`📅 ${fecha}${ev.horaInicio?' · '+ev.horaInicio+'h':''}`:'' ,
+    ev.lugar?`📍 ${ev.lugar}${ev.localVisitante?' · '+ev.localVisitante:''}`:'' ,
+    ``,
+    conc?`⏰ *Concentración: ${conc}h*`:'',
+    ``,
+    `*Jugadores convocados (${convPlayers.length}):*`,
+    ...convPlayers.map(p=>`✅ ${p.dorsal?p.dorsal+' · ':''}${p.apellidos||''}${p.nombre?', '+p.nombre.charAt(0)+'.':''}`),
+    ``,
+    `Traed equipación completa.`,
+    `_— Cuerpo técnico Racing Portuense_`,
+  ].filter(l=>l!==null&&l!==undefined);
+  return lines.join('\n');
+}
+function openWASheet(){
+  const ev=selectedMatchId?allEvents.find(e=>e.id===selectedMatchId):null;
+  document.getElementById('wa-textarea').value=generateWAMessage();
+  const info=document.getElementById('wa-match-info');
+  if(info) info.textContent=ev?(ev.rival?'vs '+ev.rival+' · ':'')+formatFechaLarga(ev.fecha):'';
+  const btn=document.getElementById('wa-copy-btn');
+  btn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar mensaje';
+  btn.style.cssText='width:100%;padding:14px;border-radius:12px;border:1px solid rgba(212,175,55,.28);background:rgba(212,175,55,.08);color:var(--gold-lt);font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:10px';
+  const sheet=document.getElementById('wa-sheet');
+  sheet.style.display='flex'; document.documentElement.style.overflow='hidden';
+}
+function closeWASheet(){ document.getElementById('wa-sheet').style.display='none'; document.documentElement.style.overflow=''; }
+document.getElementById('wa-backdrop').addEventListener('click',closeWASheet);
+document.getElementById('wa-close-btn').addEventListener('click',closeWASheet);
+document.getElementById('wa-copy-btn').addEventListener('click',async()=>{
+  const text=document.getElementById('wa-textarea').value;
+  const btn=document.getElementById('wa-copy-btn');
+  try{ await navigator.clipboard.writeText(text); }
+  catch(e){ try{ const ta=document.getElementById('wa-textarea'); ta.select(); document.execCommand('copy'); }catch(e2){} }
+  btn.innerHTML='✓ Copiado — pégalo en WhatsApp';
+  btn.style.background='rgba(67,209,138,.15)';
+  btn.style.borderColor='rgba(67,209,138,.4)';
+  btn.style.color='#43d18a';
+  setTimeout(()=>{
+    btn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar mensaje';
+    btn.style.background='rgba(212,175,55,.08)'; btn.style.borderColor='rgba(212,175,55,.28)'; btn.style.color='var(--gold-lt)';
+  },3000);
+});
+$('#conv-all-btn').addEventListener('click',()=>{
+  const available=allPlayers.filter(p=>!['Lesionado','Sancionado','Baja'].includes(p.estado)).sort((a,b)=>(Number(a.dorsal)||99)-(Number(b.dorsal)||99));
+  const allSelected=available.length>0&&available.slice(0,14).every(p=>convocados.includes(p.id));
+  if(allSelected){ convocados=[]; alineacion=Array(7).fill(null); }
+  else{ convocados=available.slice(0,14).map(p=>p.id); }
+  renderConvocatoria();
+});
+$('#wa-btn').addEventListener('click',openWASheet);
+/* ============ END WHATSAPP ============ */
 
 /* AUTH */
 const authMsgEl=$('#auth-msg');
